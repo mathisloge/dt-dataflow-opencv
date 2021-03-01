@@ -6,9 +6,17 @@
         "nlohmann-json",
         "corrade",
         {
+            "name": "magnum",
+            "features": ["gl"]
+        },
+        {
             "name": "imgui",
+            "features": []
+        },
+        {
+            "name": "opencv4",
             "features": [
-                
+                "opengl"
             ]
         }
     ]

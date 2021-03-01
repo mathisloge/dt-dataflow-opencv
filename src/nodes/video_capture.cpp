@@ -1,0 +1,118 @@
+#include "video_capture.hpp"
+#include <dt/df/core/number_slot.hpp>
+#include <dt/df/core/string_slot.hpp>
+#include "../slots/mat.hpp"
+namespace dt::df::plugin::opencv
+{
+VideoCaptureNode::VideoCaptureNode(IGraphManager &graph_manager)
+    : BaseNode{graph_manager, kKey, kName, CreateInputs(graph_manager), CreateOutputs(graph_manager)}
+    , mat_{nullptr}
+    , device_id_{0}
+    , api_id_{cv::CAP_ANY}
+    , use_device_{false}
+    , should_capture_{true}
+    , input_has_changed_{false}
+    , cap_thread_{std::bind(&VideoCaptureNode::ioFnc, this)}
+{
+    initSlots();
+}
+VideoCaptureNode::VideoCaptureNode(IGraphManager &graph_manager, const nlohmann::json &json)
+    : BaseNode{graph_manager, json}
+{
+    initSlots();
+}
+
+void VideoCaptureNode::initSlots()
+{
+    std::static_pointer_cast<MatSlot>(inputByLocalId(0))->subscribe([this](const BaseSlot *slot) {
+        mat_ = static_cast<const MatSlot *>(slot)->value();
+    });
+    std::static_pointer_cast<NumberSlot>(inputByLocalId(1))->subscribe([this](const BaseSlot *slot) {
+        device_id_ = static_cast<const NumberSlot *>(slot)->value();
+        if (use_device_)
+            input_has_changed_ = true;
+    });
+    std::static_pointer_cast<NumberSlot>(inputByLocalId(2))->subscribe([this](const BaseSlot *slot) {
+        api_id_ = static_cast<const NumberSlot *>(slot)->value();
+        if (use_device_)
+            input_has_changed_ = true;
+    });
+    std::static_pointer_cast<StringSlot>(inputByLocalId(3))->subscribe([this](const BaseSlot *slot) {
+        file_name_ = static_cast<const StringSlot *>(slot)->value();
+        if (!use_device_)
+            input_has_changed_ = true;
+    });
+    std::static_pointer_cast<NumberSlot>(inputByLocalId(4))->subscribe([this](const BaseSlot *slot) {
+        use_device_ = static_cast<const NumberSlot *>(slot)->value();
+        input_has_changed_ = true;
+    });
+    mat_out_slot_ = std::static_pointer_cast<MatSlot>(outputByLocalId(0));
+}
+
+void VideoCaptureNode::ioFnc()
+{
+    while (should_capture_)
+    {
+        if (input_has_changed_)
+        {
+            if (use_device_)
+                cap_.open(device_id_, api_id_);
+            else
+                cap_.open(file_name_, api_id_);
+            input_has_changed_ = false;
+        }
+        if (mat_)
+        {
+            cap_.read(*mat_);
+            if (!mat_->empty())
+            {
+                mat_out_slot_->accept(mat_);
+            }
+        }
+        else
+        {
+            std::this_thread::sleep_for(std::chrono::milliseconds(100));
+        }
+    }
+}
+
+VideoCaptureNode::~VideoCaptureNode()
+{
+    should_capture_ = false;
+    if (cap_thread_.joinable())
+        cap_thread_.join();
+}
+
+Slots VideoCaptureNode::CreateInputs(IGraphManager &graph_manager)
+{
+    try
+    {
+        const auto &int_slot_fac = graph_manager.getSlotFactory("IntSlot");
+        const auto &bool_slot_fac = graph_manager.getSlotFactory("BoolSlot");
+        const auto &str_slot_fac = graph_manager.getSlotFactory("StringSlot");
+        const auto &mat_slot_fac = graph_manager.getSlotFactory("OpenCvMatSlot");
+        return Slots{
+            mat_slot_fac(graph_manager, SlotType::input, "mat", 0, SlotFieldVisibility::without_connection),
+            int_slot_fac(graph_manager, SlotType::input, "device", 1, SlotFieldVisibility::without_connection),
+            int_slot_fac(graph_manager, SlotType::input, "device api", 2, SlotFieldVisibility::without_connection),
+            str_slot_fac(graph_manager, SlotType::input, "file", 3, SlotFieldVisibility::without_connection),
+            bool_slot_fac(graph_manager, SlotType::input, "use device", 4, SlotFieldVisibility::without_connection)};
+    }
+    catch (...)
+    {}
+    return Slots{};
+}
+
+Slots VideoCaptureNode::CreateOutputs(IGraphManager &graph_manager)
+{
+    try
+    {
+        const auto &mat_slot_fac = graph_manager.getSlotFactory("OpenCvMatSlot");
+        return Slots{mat_slot_fac(graph_manager, SlotType::output, "mat", 0, SlotFieldVisibility::never)};
+    }
+    catch (...)
+    {}
+    return Slots{};
+}
+
+} // namespace dt::df::plugin::opencv
