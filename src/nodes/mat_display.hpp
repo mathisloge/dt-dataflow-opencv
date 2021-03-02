@@ -3,7 +3,8 @@
 #include <dt/df/core/base_node.hpp>
 #include <dt/df/core/graph_manager.hpp>
 #include <opencv2/core.hpp>
-#include <opencv2/core/opengl.hpp>
+#include <Magnum/GL/Texture.h>
+#include <imgui.h>
 
 namespace dt::df::plugin::opencv
 {
@@ -26,6 +27,7 @@ class MatDisplayNode final : public BaseNode
     cv::Mat *mat_;
     std::mutex tex_mtx_;
     bool mat_changed_;
-    cv::ogl::Texture2D texture_;
+    Magnum::GL::Texture2D tex_;
+    ImVec2 size_;
 };
 } // namespace dt::df::plugin::opencv

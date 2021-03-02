@@ -1,4 +1,5 @@
 #include "video_capture.hpp"
+#include <iostream>
 #include <dt/df/core/number_slot.hpp>
 #include <dt/df/core/string_slot.hpp>
 #include "../slots/mat.hpp"
@@ -51,6 +52,8 @@ void VideoCaptureNode::initSlots()
 
 void VideoCaptureNode::ioFnc()
 {
+    double rate = 0;
+    using Clock = std::chrono::steady_clock;
     while (should_capture_)
     {
         if (input_has_changed_)
@@ -63,10 +66,17 @@ void VideoCaptureNode::ioFnc()
         }
         if (mat_)
         {
-            cap_.read(*mat_);
-            if (!mat_->empty())
+            const auto ts = Clock::now();
+            if (cap_.read(*mat_) && !mat_->empty())
             {
+                rate = cap_.get(cv::CAP_PROP_FPS);
                 mat_out_slot_->accept(mat_);
+
+                const auto currentFrame = cap_.get(cv::CAP_PROP_POS_FRAMES);
+                const auto currentTime = cap_.get(cv::CAP_PROP_POS_MSEC);
+                const auto fps = currentFrame / (currentTime / 1000.);
+
+                std::this_thread::sleep_until(ts + std::chrono::nanoseconds(static_cast<int>(fps * 1000000.)));
             }
         }
         else

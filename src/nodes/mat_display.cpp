@@ -1,5 +1,15 @@
 #include "mat_display.hpp"
+#include <Corrade/Containers/ArrayView.h>
+#include <Magnum/GL/TextureFormat.h>
+#include <Magnum/ImageView.h>
+#include <Magnum/Math/Color.h>
+#include <Magnum/Math/Functions.h>
+#include <Magnum/Math/Range.h>
+#include <Magnum/PixelFormat.h>
 #include <imgui.h>
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui_internal.h>
+#include <opencv2/imgproc.hpp>
 #include "../slots/mat.hpp"
 
 namespace dt::df::plugin::opencv
@@ -29,17 +39,30 @@ void MatDisplayNode::initSlots()
 
 void MatDisplayNode::renderCustomContent()
 {
+    using namespace Magnum;
     ImGui::Text("Current Mat:");
     ImGui::Value("W", mat_ ? mat_->size().width : 0);
     ImGui::Value("H", mat_ ? mat_->size().height : 0);
     if (mat_changed_ && mat_)
     {
+
         std::unique_lock<std::mutex> l{tex_mtx_};
         mat_changed_ = false;
-        texture_.copyFrom(*mat_);
-        //cv::ogl::convertToGLTexture2D(*mat_, texture_);
+        cv::Mat img_mat;
+        cv::cvtColor(*mat_, img_mat, cv::COLOR_BGR2RGB);
+        Corrade::Containers::ArrayView arr_view(img_mat.data, img_mat.total() * img_mat.elemSize());
+        ImageView2D image(PixelFormat::RGB8Unorm, {img_mat.size().width, img_mat.size().height}, arr_view);
+
+        tex_.setMagnificationFilter(GL::SamplerFilter::Linear)
+            .setMinificationFilter(GL::SamplerFilter::Linear, GL::SamplerMipmap::Linear)
+            .setWrapping(GL::SamplerWrapping::ClampToEdge)
+            .setMaxAnisotropy(GL::Sampler::maxMaxAnisotropy())
+            .setStorage(1, GL::TextureFormat::RGBA8, image.size())
+            .setSubImage(0, {}, image)
+            .generateMipmap();
+        size_ = ImVec2{static_cast<float>(image.size().x()), static_cast<float>(image.size().y())};
     }
-    //ImGui::Image(reinterpret_cast<void *>(texture_.texId()), ImVec2(texture_.size().width, texture_.size().height));
+    ImGui::Image(static_cast<ImTextureID>(&tex_), size_ / 3.f);
 }
 
 Slots MatDisplayNode::CreateInputs(IGraphManager &graph_manager)
