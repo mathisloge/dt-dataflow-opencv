@@ -63,7 +63,7 @@ void VideoCaptureNode::initSlots()
 void VideoCaptureNode::ioFnc()
 {
     double rate = 0;
-    using Clock = std::chrono::steady_clock;
+    using Clock = std::chrono::high_resolution_clock;
     while (should_capture_)
     {
         if (input_has_changed_)
@@ -84,13 +84,13 @@ void VideoCaptureNode::ioFnc()
 
                 const auto current_frame = cap_.get(cv::CAP_PROP_POS_FRAMES);
                 const auto current_time = cap_.get(cv::CAP_PROP_POS_MSEC);
-                const auto fps = current_frame / (current_time / 1000.);
+                const auto fps = current_frame / (current_time / 1e3);
 
                 fps_out_slot_->setValue(fps);
                 width_out_slot_->setValue(mat_->size().width);
                 height_out_slot_->setValue(mat_->size().height);
 
-                std::this_thread::sleep_until(ts + std::chrono::nanoseconds(static_cast<int>(fps * 1000000.)));
+                std::this_thread::sleep_until(ts + std::chrono::nanoseconds(static_cast<int>((1. / fps) * 1e9)));
             }
         }
         else
