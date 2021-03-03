@@ -50,13 +50,28 @@ void MatDisplayNode::renderCustomContent()
         ImageView2D image(tryDetectPixelformat(*mat_), {mat_->size().width, mat_->size().height}, arr_view);
 
         const auto channels = mat_->channels();
-        tex_.setMagnificationFilter(GL::SamplerFilter::Linear)
-            .setMinificationFilter(GL::SamplerFilter::Linear, GL::SamplerMipmap::Linear)
-            .setWrapping(GL::SamplerWrapping::ClampToEdge)
-            .setMaxAnisotropy(GL::Sampler::maxMaxAnisotropy())
-            .setStorage(1, channels == 1 ? GL::TextureFormat::R8 : GL::TextureFormat::RGBA8, image.size())
-            .setSubImage(0, {}, image)
-            .generateMipmap();
+        if (channels == 1)
+        {
+            tex_.setMagnificationFilter(GL::SamplerFilter::Linear)
+                .setMinificationFilter(GL::SamplerFilter::Linear, GL::SamplerMipmap::Linear)
+                .setSwizzle<'r', 'r', 'r', 'r'>()
+                .setWrapping(GL::SamplerWrapping::ClampToEdge)
+                .setMaxAnisotropy(GL::Sampler::maxMaxAnisotropy())
+                .setStorage(1, GL::TextureFormat::R8, image.size())
+                .setSubImage(0, {}, image)
+                .generateMipmap();
+        }
+        else
+        {
+            tex_.setMagnificationFilter(GL::SamplerFilter::Linear)
+                .setMinificationFilter(GL::SamplerFilter::Linear, GL::SamplerMipmap::Linear)
+                .setSwizzle<'r', 'g', 'b', 'a'>()
+                .setWrapping(GL::SamplerWrapping::ClampToEdge)
+                .setMaxAnisotropy(GL::Sampler::maxMaxAnisotropy())
+                .setStorage(1, GL::TextureFormat::RGBA8, image.size())
+                .setSubImage(0, {}, image)
+                .generateMipmap();
+        }
         size_ = ImVec2{static_cast<float>(image.size().x()), static_cast<float>(image.size().y())};
     }
     ImGui::Image(static_cast<ImTextureID>(&tex_), size_ / 3.f);
