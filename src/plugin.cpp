@@ -8,6 +8,7 @@
 #include "nodes/mat_display.hpp"
 #include "nodes/mat_output.hpp"
 #include "nodes/video_capture.hpp"
+#include "nodes/video_writer.hpp"
 #include "slots/mat.hpp"
 
 namespace dt::df::plugin
@@ -49,6 +50,7 @@ class OpenCvPlugin final : public Plugin
     void registerNodeFactories(IGraphManager &graph)
     {
         registerNode<opencv::VideoCaptureNode>(graph, "opencv/");
+        registerNode<opencv::VideoWriterNode>(graph, "opencv/");
         registerNode<opencv::MatDisplayNode>(graph, "opencv/");
         registerNode<opencv::MatCopyNode>(graph, "opencv/");
         registerNode<opencv::MatOutputNode>(graph, "opencv/");

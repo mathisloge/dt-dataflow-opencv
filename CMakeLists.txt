@@ -14,6 +14,7 @@ set(SOURCES
     src/nodes/mat_output.cpp
     src/nodes/mat_display.cpp
     src/nodes/video_capture.cpp
+    src/nodes/video_writer.cpp
     src/nodes/color_cvt.cpp
 )
 

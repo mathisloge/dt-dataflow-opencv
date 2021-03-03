@@ -19,6 +19,13 @@ VideoCaptureNode::VideoCaptureNode(IGraphManager &graph_manager)
 }
 VideoCaptureNode::VideoCaptureNode(IGraphManager &graph_manager, const nlohmann::json &json)
     : BaseNode{graph_manager, json}
+    , mat_{nullptr}
+    , device_id_{0}
+    , api_id_{cv::CAP_ANY}
+    , use_device_{false}
+    , should_capture_{true}
+    , input_has_changed_{false}
+    , cap_thread_{std::bind(&VideoCaptureNode::ioFnc, this)}
 {
     initSlots();
 }
@@ -48,6 +55,9 @@ void VideoCaptureNode::initSlots()
         input_has_changed_ = true;
     });
     mat_out_slot_ = std::static_pointer_cast<MatSlot>(outputByLocalId(0));
+    fps_out_slot_ = std::static_pointer_cast<NumberSlot>(outputByLocalId(1));
+    width_out_slot_ = std::static_pointer_cast<NumberSlot>(outputByLocalId(2));
+    height_out_slot_ = std::static_pointer_cast<NumberSlot>(outputByLocalId(3));
 }
 
 void VideoCaptureNode::ioFnc()
@@ -75,6 +85,10 @@ void VideoCaptureNode::ioFnc()
                 const auto current_frame = cap_.get(cv::CAP_PROP_POS_FRAMES);
                 const auto current_time = cap_.get(cv::CAP_PROP_POS_MSEC);
                 const auto fps = current_frame / (current_time / 1000.);
+
+                fps_out_slot_->setValue(fps);
+                width_out_slot_->setValue(mat_->size().width);
+                height_out_slot_->setValue(mat_->size().height);
 
                 std::this_thread::sleep_until(ts + std::chrono::nanoseconds(static_cast<int>(fps * 1000000.)));
             }
@@ -118,7 +132,13 @@ Slots VideoCaptureNode::CreateOutputs(IGraphManager &graph_manager)
     try
     {
         const auto &mat_slot_fac = graph_manager.getSlotFactory("OpenCvMatSlot");
-        return Slots{mat_slot_fac(graph_manager, SlotType::output, "mat", 0, SlotFieldVisibility::never)};
+        const auto &int_slot_fac = graph_manager.getSlotFactory("IntSlot");
+        const auto &float_slot_fac = graph_manager.getSlotFactory("FloatingSlot");
+        return Slots{
+            mat_slot_fac(graph_manager, SlotType::output, "mat", 0, SlotFieldVisibility::never),
+            float_slot_fac(graph_manager, SlotType::output, "fps", 1, SlotFieldVisibility::never),
+            int_slot_fac(graph_manager, SlotType::output, "width", 2, SlotFieldVisibility::never),
+            int_slot_fac(graph_manager, SlotType::output, "height", 3, SlotFieldVisibility::without_connection)};
     }
     catch (...)
     {}

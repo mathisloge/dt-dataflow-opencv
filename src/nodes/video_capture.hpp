@@ -2,6 +2,7 @@
 #include <thread>
 #include <dt/df/core/base_node.hpp>
 #include <dt/df/core/graph_manager.hpp>
+#include <dt/df/core/number_slot.hpp>
 #include <opencv2/core.hpp>
 #include <opencv2/videoio.hpp>
 #include "../slots/mat.hpp"
@@ -36,5 +37,8 @@ class VideoCaptureNode final : public BaseNode
     std::thread cap_thread_;
 
     std::shared_ptr<MatSlot> mat_out_slot_;
+    std::shared_ptr<NumberSlot> fps_out_slot_;
+    std::shared_ptr<NumberSlot> width_out_slot_;
+    std::shared_ptr<NumberSlot> height_out_slot_;
 };
 } // namespace dt::df::plugin::opencv
