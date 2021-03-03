@@ -13,7 +13,9 @@
         },
         {
             "name": "imgui",
-            "features": []
+            "features": [
+                "docking-experimental"
+            ]
         },
         {
             "name": "opencv4",
