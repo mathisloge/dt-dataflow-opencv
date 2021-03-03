@@ -17,11 +17,6 @@
                 "docking-experimental"
             ]
         },
-        {
-            "name": "opencv4",
-            "features": [
-                "opengl"
-            ]
-        }
+        "opencv4"
     ]
 }

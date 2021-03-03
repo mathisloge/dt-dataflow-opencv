@@ -72,9 +72,9 @@ void VideoCaptureNode::ioFnc()
                 rate = cap_.get(cv::CAP_PROP_FPS);
                 mat_out_slot_->accept(mat_);
 
-                const auto currentFrame = cap_.get(cv::CAP_PROP_POS_FRAMES);
-                const auto currentTime = cap_.get(cv::CAP_PROP_POS_MSEC);
-                const auto fps = currentFrame / (currentTime / 1000.);
+                const auto current_frame = cap_.get(cv::CAP_PROP_POS_FRAMES);
+                const auto current_time = cap_.get(cv::CAP_PROP_POS_MSEC);
+                const auto fps = current_frame / (current_time / 1000.);
 
                 std::this_thread::sleep_until(ts + std::chrono::nanoseconds(static_cast<int>(fps * 1000000.)));
             }

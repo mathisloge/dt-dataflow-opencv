@@ -5,8 +5,7 @@ find_package(Corrade REQUIRED PluginManager)
 find_package(Magnum REQUIRED GL)
 find_package(imgui CONFIG REQUIRED)
 find_package(OpenCV CONFIG REQUIRED)
-
-add_subdirectory(dt-dataflow)
+find_package(DtDataFlow CONFIG REQUIRED)
 
 set(SOURCES         
     src/plugin.cpp
@@ -37,9 +36,9 @@ target_include_directories(OpenCVPlugin PRIVATE ${OpenCV_INCLUDE_DIRS} )
 target_link_libraries(OpenCVPlugin PRIVATE 
     Corrade::PluginManager
     imgui::imgui
-    imgui::imnodes
     Magnum::Magnum
     Magnum::GL
+    dt::imnodes
     dt::DtDataflowCore
     dt::DtDataflowPlugin
     ${OpenCV_LIBS}
