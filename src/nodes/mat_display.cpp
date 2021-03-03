@@ -81,6 +81,7 @@ Magnum::PixelFormat MatDisplayNode::tryDetectPixelformat(const cv::Mat &mat) con
     default:
         return PixelFormat::RGB8Unorm;
     };
+    return PixelFormat::RGB8Unorm;
 }
 
 Slots MatDisplayNode::CreateInputs(IGraphManager &graph_manager)
