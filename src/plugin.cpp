@@ -3,6 +3,7 @@
 #include <Magnum/Platform/GLContext.h>
 #include <dt/df/plugin/plugin.hpp>
 #include <imnodes.h>
+#include "nodes/color_cvt.hpp"
 #include "nodes/mat_copy.hpp"
 #include "nodes/mat_display.hpp"
 #include "nodes/mat_output.hpp"
@@ -51,6 +52,7 @@ class OpenCvPlugin final : public Plugin
         registerNode<opencv::MatDisplayNode>(graph, "opencv/");
         registerNode<opencv::MatCopyNode>(graph, "opencv/");
         registerNode<opencv::MatOutputNode>(graph, "opencv/");
+        registerNode<opencv::ColorCvtNode>(graph, "opencv/");
     }
     void registerSlotFactories(IGraphManager &graph)
     {

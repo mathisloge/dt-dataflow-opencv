@@ -5,11 +5,9 @@
 #include <Magnum/Math/Color.h>
 #include <Magnum/Math/Functions.h>
 #include <Magnum/Math/Range.h>
-#include <Magnum/PixelFormat.h>
 #include <imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui_internal.h>
-#include <opencv2/imgproc.hpp>
 #include "../slots/mat.hpp"
 
 namespace dt::df::plugin::opencv
@@ -48,21 +46,41 @@ void MatDisplayNode::renderCustomContent()
 
         std::unique_lock<std::mutex> l{tex_mtx_};
         mat_changed_ = false;
-        cv::Mat img_mat;
-        cv::cvtColor(*mat_, img_mat, cv::COLOR_BGR2RGB);
-        Corrade::Containers::ArrayView arr_view(img_mat.data, img_mat.total() * img_mat.elemSize());
-        ImageView2D image(PixelFormat::RGB8Unorm, {img_mat.size().width, img_mat.size().height}, arr_view);
+        Corrade::Containers::ArrayView arr_view(mat_->data, mat_->total() * mat_->elemSize());
+        ImageView2D image(tryDetectPixelformat(*mat_), {mat_->size().width, mat_->size().height}, arr_view);
 
+        const auto channels = mat_->channels();
         tex_.setMagnificationFilter(GL::SamplerFilter::Linear)
             .setMinificationFilter(GL::SamplerFilter::Linear, GL::SamplerMipmap::Linear)
             .setWrapping(GL::SamplerWrapping::ClampToEdge)
             .setMaxAnisotropy(GL::Sampler::maxMaxAnisotropy())
-            .setStorage(1, GL::TextureFormat::RGBA8, image.size())
+            .setStorage(1, channels == 1 ? GL::TextureFormat::R8 : GL::TextureFormat::RGBA8, image.size())
             .setSubImage(0, {}, image)
             .generateMipmap();
         size_ = ImVec2{static_cast<float>(image.size().x()), static_cast<float>(image.size().y())};
     }
     ImGui::Image(static_cast<ImTextureID>(&tex_), size_ / 3.f);
+}
+
+Magnum::PixelFormat MatDisplayNode::tryDetectPixelformat(const cv::Mat &mat) const
+{
+    using namespace Magnum;
+    const auto channels = mat.channels();
+    switch (mat.depth())
+    {
+    case CV_8U:
+        if (channels == 1)
+            return PixelFormat::R8Unorm;
+        else if (channels == 2)
+            return PixelFormat::RG8Unorm;
+        else if (channels == 3)
+            return PixelFormat::RGB8Unorm;
+        else if (channels == 4)
+            return PixelFormat::RGBA8Unorm;
+        break;
+    default:
+        return PixelFormat::RGB8Unorm;
+    };
 }
 
 Slots MatDisplayNode::CreateInputs(IGraphManager &graph_manager)

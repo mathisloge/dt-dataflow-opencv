@@ -1,10 +1,11 @@
 #pragma once
 #include <mutex>
+#include <Magnum/GL/Texture.h>
+#include <Magnum/PixelFormat.h>
 #include <dt/df/core/base_node.hpp>
 #include <dt/df/core/graph_manager.hpp>
-#include <opencv2/core.hpp>
-#include <Magnum/GL/Texture.h>
 #include <imgui.h>
+#include <opencv2/core.hpp>
 
 namespace dt::df::plugin::opencv
 {
@@ -21,6 +22,7 @@ class MatDisplayNode final : public BaseNode
   private:
     void initSlots();
     void renderCustomContent() override;
+    Magnum::PixelFormat tryDetectPixelformat(const cv::Mat& mat) const;
     static Slots CreateInputs(IGraphManager &graph_manager);
 
   private:

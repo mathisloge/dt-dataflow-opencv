@@ -14,6 +14,7 @@ set(SOURCES
     src/nodes/mat_output.cpp
     src/nodes/mat_display.cpp
     src/nodes/video_capture.cpp
+    src/nodes/color_cvt.cpp
 )
 
 set(DTDF_PLUGIN_INSTALL_DBG_DIR ${CMAKE_INSTALL_PREFIX}/bin/dataflow/dbg)
