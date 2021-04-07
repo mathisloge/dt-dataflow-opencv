@@ -13,7 +13,7 @@ void MatSlot::accept(const BaseSlot *slot)
 void MatSlot::accept(cv::Mat *val)
 {
     mat_ = val;
-    needsReevaluation();
+    valueChanged();
 }
 
 cv::Mat *MatSlot::value() const
@@ -29,6 +29,6 @@ bool MatSlot::canConnect(const BaseSlot *const slot) const
 void MatSlot::connectEvent()
 {
     BaseSlot::connectEvent();
-    needsReevaluation();
+    valueChanged();
 }
 } // namespace dt::df::plugin::opencv

@@ -24,7 +24,7 @@ void MatCopyNode::initSlots()
         if (copy_mat)
         {
             copy_mat->copyTo(mat_);
-            std::static_pointer_cast<MatSlot>(outputByLocalId(0))->needsReevaluation();
+            std::static_pointer_cast<MatSlot>(outputByLocalId(0))->valueChanged();
         }
     });
     std::static_pointer_cast<MatSlot>(outputByLocalId(0))->accept(&mat_);
