@@ -90,6 +90,7 @@ void VideoCaptureNode::ioFnc()
                 fps_out_slot_->setValue(fps);
                 width_out_slot_->setValue(mat_->size().width);
                 height_out_slot_->setValue(mat_->size().height);
+                calculateIfNoFlow();
 
                 std::this_thread::sleep_until(ts + std::chrono::nanoseconds(static_cast<int>((1. / fps) * 1e9)));
             }
