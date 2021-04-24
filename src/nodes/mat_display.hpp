@@ -18,7 +18,7 @@ class MatDisplayNode final : public BaseNode
   public:
     MatDisplayNode(IGraphManager &graph_manager);
     MatDisplayNode(IGraphManager &graph_manager, const nlohmann::json &json);
-
+    void calculate() override;
   private:
     void initSlots();
     void renderCustomContent() override;

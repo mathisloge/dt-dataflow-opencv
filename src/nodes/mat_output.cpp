@@ -18,6 +18,9 @@ void MatOutputNode::initSlots()
     std::static_pointer_cast<MatSlot>(outputByLocalId(0))->accept(&mat_);
 }
 
+void MatOutputNode::calculate()
+{}
+
 Slots MatOutputNode::CreateOutputs(IGraphManager &graph_manager)
 {
     try

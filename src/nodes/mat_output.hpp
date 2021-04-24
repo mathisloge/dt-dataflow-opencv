@@ -13,6 +13,7 @@ class MatOutputNode final : public BaseNode
   public:
     MatOutputNode(IGraphManager &graph_manager);
     MatOutputNode(IGraphManager &graph_manager, const nlohmann::json &json);
+    void calculate() override;
 
   private:
     void initSlots();

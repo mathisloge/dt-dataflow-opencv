@@ -18,7 +18,7 @@ class VideoWriterNode final : public BaseNode
     VideoWriterNode(IGraphManager &graph_manager);
     VideoWriterNode(IGraphManager &graph_manager, const nlohmann::json &json);
     ~VideoWriterNode();
-
+    void calculate();
   private:
     void initSlots();
     void ioFnc();

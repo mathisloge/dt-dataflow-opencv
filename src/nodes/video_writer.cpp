@@ -114,6 +114,9 @@ void VideoWriterNode::initSlots()
     });
 }
 
+void VideoWriterNode::calculate()
+{}
+
 void VideoWriterNode::ioFnc()
 {
     while (should_capture_)

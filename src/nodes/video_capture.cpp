@@ -76,7 +76,7 @@ void VideoCaptureNode::ioFnc()
         }
         if (mat_)
         {
-            
+
             const auto ts = Clock::now();
             if (cap_.read(*mat_) && !mat_->empty())
             {
@@ -100,6 +100,9 @@ void VideoCaptureNode::ioFnc()
         }
     }
 }
+
+void VideoCaptureNode::calculate()
+{}
 
 VideoCaptureNode::~VideoCaptureNode()
 {

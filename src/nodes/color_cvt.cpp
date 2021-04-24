@@ -15,6 +15,19 @@ ColorCvtNode::ColorCvtNode(IGraphManager &graph_manager, const nlohmann::json &j
     initSlots();
 }
 
+void ColorCvtNode::calculate()
+{
+    auto in_mat = std::static_pointer_cast<MatSlot>(inputByLocalId(0))->value();
+    if (in_mat && !in_mat->empty())
+    {
+        const auto prev_it = kColorVals.find(selected_color_);
+        const cv::ColorConversionCodes color_conv_code{prev_it != kColorVals.end() ? prev_it->first
+                                                                                   : cv::COLOR_BGR2RGB};
+        cv::cvtColor(*in_mat, *in_mat, color_conv_code);
+        output_slot_->accept(in_mat);
+    }
+}
+
 void ColorCvtNode::renderCustomContent()
 {
     ImGui::PushID(this);
@@ -39,17 +52,6 @@ void ColorCvtNode::initSlots()
 {
     selected_color_ = cv::COLOR_BGR2RGB;
     output_slot_ = std::static_pointer_cast<MatSlot>(outputByLocalId(0));
-    std::static_pointer_cast<MatSlot>(inputByLocalId(0))->subscribe([this](const BaseSlot *slot) {
-        auto in_mat = static_cast<const MatSlot *>(slot)->value();
-        if (in_mat && !in_mat->empty())
-        {
-            const auto prev_it = kColorVals.find(selected_color_);
-            const cv::ColorConversionCodes color_conv_code{prev_it != kColorVals.end() ? prev_it->first
-                                                                                       : cv::COLOR_BGR2RGB};
-            cv::cvtColor(*in_mat, *in_mat, color_conv_code);
-            output_slot_->accept(in_mat);
-        }
-    });
 }
 
 Slots ColorCvtNode::CreateInputs(IGraphManager &graph_manager)

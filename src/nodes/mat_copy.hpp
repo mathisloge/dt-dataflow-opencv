@@ -13,7 +13,7 @@ class MatCopyNode final : public BaseNode
   public:
     MatCopyNode(IGraphManager &graph_manager);
     MatCopyNode(IGraphManager &graph_manager, const nlohmann::json &json);
-
+    void calculate() override;
   private:
     void initSlots();
     static Slots CreateInputs(IGraphManager &graph_manager);

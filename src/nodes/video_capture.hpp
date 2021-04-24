@@ -18,6 +18,7 @@ class VideoCaptureNode final : public BaseNode
     VideoCaptureNode(IGraphManager &graph_manager);
     VideoCaptureNode(IGraphManager &graph_manager, const nlohmann::json &json);
     ~VideoCaptureNode();
+    void calculate() override;
 
   private:
     void initSlots();

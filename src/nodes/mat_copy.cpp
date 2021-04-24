@@ -3,11 +3,7 @@
 namespace dt::df::plugin::opencv
 {
 MatCopyNode::MatCopyNode(IGraphManager &graph_manager)
-    : BaseNode{graph_manager,
-               kKey,
-               kName,
-               Slots{CreateInputs(graph_manager)},
-               Slots{CreateOutputs(graph_manager)}}
+    : BaseNode{graph_manager, kKey, kName, Slots{CreateInputs(graph_manager)}, Slots{CreateOutputs(graph_manager)}}
 {
     initSlots();
 }
@@ -19,15 +15,17 @@ MatCopyNode::MatCopyNode(IGraphManager &graph_manager, const nlohmann::json &jso
 
 void MatCopyNode::initSlots()
 {
-    std::static_pointer_cast<MatSlot>(inputByLocalId(0))->subscribe([this](const BaseSlot *slot) {
-        auto copy_mat = static_cast<const MatSlot *>(slot)->value();
-        if (copy_mat)
-        {
-            copy_mat->copyTo(mat_);
-            std::static_pointer_cast<MatSlot>(outputByLocalId(0))->valueChanged();
-        }
-    });
     std::static_pointer_cast<MatSlot>(outputByLocalId(0))->accept(&mat_);
+}
+
+void MatCopyNode::calculate()
+{
+    auto copy_mat = std::static_pointer_cast<MatSlot>(inputByLocalId(0))->value();
+    if (copy_mat)
+    {
+        copy_mat->copyTo(mat_);
+        std::static_pointer_cast<MatSlot>(outputByLocalId(0))->valueChanged();
+    }
 }
 
 Slots MatCopyNode::CreateInputs(IGraphManager &graph_manager)

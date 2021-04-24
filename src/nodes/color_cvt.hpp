@@ -16,6 +16,7 @@ class ColorCvtNode final : public BaseNode
   public:
     ColorCvtNode(IGraphManager &graph_manager);
     ColorCvtNode(IGraphManager &graph_manager, const nlohmann::json &json);
+    void calculate() override;
 
   private:
     void initSlots();

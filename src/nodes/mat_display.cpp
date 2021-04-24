@@ -35,6 +35,9 @@ void MatDisplayNode::initSlots()
     });
 }
 
+void MatDisplayNode::calculate()
+{}
+
 void MatDisplayNode::renderCustomContent()
 {
     using namespace Magnum;
